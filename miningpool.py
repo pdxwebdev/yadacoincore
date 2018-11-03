@@ -134,16 +134,6 @@ class MiningPool(object):
         return transaction_objs
     
     @classmethod
-    def pool_mine(cls, pool_peer, address, header, target, nonces, special_min):
-        nonce, lhash = BlockFactory.mine(header, target, nonces, special_min)
-        if nonce and lhash:
-            requests.post("http://{pool}/pool-submit".format(pool=pool_peer), json={
-                'nonce': nonce,
-                'hash': lhash,
-                'address': address
-            }, headers={'Connection':'close'})
-    
-    @classmethod
     def broadcast_block(cls, block):
         Peers.init()
         dup_test = Mongo.db.consensus.find_one({

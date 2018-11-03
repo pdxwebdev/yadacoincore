@@ -176,23 +176,6 @@ class BlockFactory(object):
         return target
 
     @classmethod
-    def mine(cls, header, target, nonces, special_min=False):
-
-        lowest = (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 0, '')
-        nonce = nonces[0]
-        while nonce < nonces[1]:
-            hash_test = cls.generate_hash_from_header(header, str(nonce))
-
-            text_int = int(hash_test, 16)
-            if text_int < target or special_min:
-                return nonce, hash_test
-
-            if text_int < lowest[0]:
-                lowest = (text_int, nonce, hash_test)
-            nonce += 1
-        return lowest[1], lowest[2]
-
-    @classmethod
     def get_genesis_block(cls):
         return Block.from_dict({
             "nonce" : 0,

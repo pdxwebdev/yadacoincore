@@ -3,6 +3,7 @@ import os
 import json
 import binascii
 import base58
+import codecs
 from bitcoin.wallet import P2PKHBitcoinAddress
 from coincurve import PrivateKey, PublicKey
 
@@ -10,14 +11,16 @@ from coincurve import PrivateKey, PublicKey
 class Config(object):
     @classmethod
     def generate(cls, mongodb_host=None):
-        num = os.urandom(32).encode('hex')
+        num = os.urandom(32).hex()
         pk = PrivateKey.from_hex(num)
         cls.private_key = pk.to_hex()
+        cls.public_key = pk.public_key.format().hex()
+        cls.address = str(P2PKHBitcoinAddress.from_pubkey(pk.public_key.format()))
         cls.from_dict({
             "private_key": cls.private_key,
             "wif": cls.to_wif(),
-            "public_key": pk.public_key.format().encode('hex'),
-            "address": str(P2PKHBitcoinAddress.from_pubkey(pk.public_key.format())),
+            "public_key": cls.public_key,
+            "address": cls.address,
             "serve_host": "0.0.0.0",
             "serve_port": 8000,
             "peer_host": "",
@@ -37,12 +40,11 @@ class Config(object):
     @classmethod
     def from_dict(cls, config):
         cls.public_key = config['public_key']
-        cls.address = str(P2PKHBitcoinAddress.from_pubkey(cls.public_key.decode('hex')))
+        cls.address = config['address']
 
         cls.private_key = config['private_key']
         cls.username = config['username']
         cls.wif = cls.to_wif()
-        cls.bulletin_secret = cls.get_bulletin_secret()
 
         cls.mongodb_host = config['mongodb_host']
         cls.database = config['database']
@@ -62,7 +64,6 @@ class Config(object):
 
     @classmethod
     def get_bulletin_secret(cls):
-        from transactionutils import TU
         return TU.generate_deterministic_signature(Config.username)
 
     @classmethod
@@ -73,7 +74,7 @@ class Config(object):
         second_sha256 = hashlib.sha256(binascii.unhexlify(first_sha256)).hexdigest()
         final_key = extended_key+second_sha256[:8]
         wif = base58.b58encode(binascii.unhexlify(final_key))
-        return wif
+        return wif.decode("utf-8") 
 
     @classmethod
     def to_dict(cls):
@@ -82,7 +83,6 @@ class Config(object):
             'address': cls.address,
             'private_key': cls.private_key,
             'wif': cls.wif,
-            'bulletin_secret': cls.bulletin_secret,
             'mongodb_host': cls.mongodb_host,
             'username': cls.username,
             'database': cls.database,
