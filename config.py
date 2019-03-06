@@ -40,7 +40,7 @@ class Config(object):
     @classmethod
     def from_dict(cls, config):
         cls.public_key = config['public_key']
-        cls.address = config['address']
+        cls.address = config.get('address', str(P2PKHBitcoinAddress.from_pubkey(codecs.decode(config['public_key'], 'hex'))))
 
         cls.private_key = config['private_key']
         cls.username = config['username']

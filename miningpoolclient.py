@@ -3,7 +3,7 @@ import requests
 
 class MiningPoolClient(object):
     @classmethod
-    def pool_mine(cls, pool_peer, address, header, target, nonces, special_min):
+    def pool_mine(cls, pool_peer, address, header, target, nonces, special_min, debug=False):
 
         lowest = (0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 0, '')
         nonce = nonces[0]
@@ -12,6 +12,7 @@ class MiningPoolClient(object):
 
             text_int = int(hash_test, 16)
             if text_int < target or special_min:
+                lowest = (text_int, nonce, hash_test)
                 break
 
             if text_int < lowest[0]:
@@ -20,7 +21,7 @@ class MiningPoolClient(object):
         nonce = lowest[1]
         lhash = lowest[2]
 
-        if nonce and lhash:
+        if nonce and lhash or special_min:
             try:
                 requests.post("http://{pool}/pool-submit".format(pool=pool_peer), json={
                     'nonce': nonce,
@@ -28,4 +29,5 @@ class MiningPoolClient(object):
                     'address': address
                 }, headers={'Connection':'close'})
             except Exception as e:
-                print (e)
+                if debug:
+                    print(e)
