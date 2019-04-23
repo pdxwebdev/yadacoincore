@@ -68,11 +68,11 @@ class MiningPool(object):
                 cls.pool_init(Config.to_dict())
             else:
                 try:
-                    start_nonce += 1000000
+                    start_nonce += 10000000
                 except:
                     start_nonce = 0
             MiningPool.index = latest_block_index
-            yield [start_nonce, start_nonce + 1000000]
+            yield [start_nonce, start_nonce + 10000000]
 
     @classmethod
     def get_pending_transactions(cls):
