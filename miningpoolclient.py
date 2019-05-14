@@ -23,11 +23,11 @@ class MiningPoolClient(object):
 
         if nonce and lhash or special_min:
             try:
-                requests.post("http://{pool}/pool-submit".format(pool=pool_peer), json={
-                    'nonce': nonce,
+                return requests.post("{pool}/pool-submit".format(pool=pool_peer), json={
+                    'nonce': str(hex(nonce)[2:]),
                     'hash': lhash,
                     'address': address
-                }, headers={'Connection':'close'})
+                }, headers={'Connection':'close'}, verify=False)
             except Exception as e:
                 if debug:
                     print(e)
